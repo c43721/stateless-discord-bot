@@ -22,9 +22,44 @@ pub(crate) enum InteractionResponseType {
     ACKWithSource = 5,
 }
 
+#[allow(dead_code)]
+#[derive(Deserialize)]
+pub(crate) struct User {
+    pub(crate) id: String,
+    pub(crate) username: String,
+    pub(crate) avatar: String,
+    pub(crate) discriminator: String,
+    pub(crate) public_flags: u128,
+}
+
+#[allow(dead_code)]
+#[derive(Deserialize)]
+pub(crate) struct GuildMember {
+    pub(crate) user: Option<User>,
+    pub(crate) roles: Vec<String>,
+    pub(crate) permissions: String,
+    pub(crate) pending: bool,
+    pub(crate) mute: bool,
+    pub(crate) nick: String,
+    pub(crate) joined_at: String,
+    pub(crate) is_pending: bool,
+    pub(crate) deaf: bool,
+}
+
+#[allow(dead_code)]
+#[derive(Deserialize)]
+pub(crate) struct InteractionOptionsData {
+    pub(crate) name: String,
+    pub(crate) value: String,
+}
+
+#[allow(dead_code)]
 #[derive(Deserialize)]
 pub(crate) struct ApplicationCommandInteractionData {
     pub(crate) name: String,
+    pub(crate) id: String,
+
+    pub(crate) options: Option<Vec<InteractionOptionsData>>,
 }
 
 #[derive(Serialize)]
@@ -32,11 +67,19 @@ pub(crate) struct InteractionApplicationCommandCallbackData {
     pub(crate) content: String,
 }
 
+#[allow(dead_code)]
 #[derive(Deserialize)]
 pub(crate) struct Interaction {
     #[serde(rename = "type")]
     ty: InteractionType,
-    data: Option<ApplicationCommandInteractionData>,
+    pub(crate) data: Option<ApplicationCommandInteractionData>,
+
+    pub(crate) guild_id: String,
+    pub(crate) id: String,
+    pub(crate) channel_id: String,
+    pub(crate) token: String,
+    pub(crate) member: Option<GuildMember>,
+    pub(crate) version: u8,
 }
 
 impl Interaction {
@@ -62,7 +105,7 @@ impl Interaction {
                 ty: InteractionResponseType::Pong,
                 data: None,
             },
-            InteractionType::ApplicationCommand => handle_command(self.data()?),
+            InteractionType::ApplicationCommand => handle_command(self.data()?, &self),
         })
     }
 }
