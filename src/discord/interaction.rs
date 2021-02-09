@@ -36,14 +36,16 @@ pub(crate) struct User {
 #[derive(Deserialize)]
 pub(crate) struct GuildMember {
     pub(crate) user: Option<User>,
+    pub(crate) nick: Option<String>,
+
     pub(crate) roles: Vec<String>,
-    pub(crate) permissions: String,
     pub(crate) pending: bool,
     pub(crate) mute: bool,
-    pub(crate) nick: String,
     pub(crate) joined_at: String,
-    pub(crate) is_pending: bool,
     pub(crate) deaf: bool,
+
+    pub(crate) permissions: Option<String>,
+    pub(crate) is_pending: Option<bool>,
 }
 
 #[allow(dead_code)]
@@ -78,7 +80,9 @@ pub(crate) struct Interaction {
     pub(crate) id: String,
     pub(crate) channel_id: String,
     pub(crate) token: String,
-    pub(crate) member: Option<GuildMember>,
+    pub(crate) member: GuildMember,
+
+    // Readonly, always 1
     pub(crate) version: u8,
 }
 
@@ -88,6 +92,15 @@ impl Interaction {
             .data
             .as_ref()
             .ok_or_else(|| Error::InvalidPayload("data not found".to_string()))?)
+    }
+
+    pub(crate) fn options(&self) -> Result<&Vec<InteractionOptionsData>, Error> {
+        let data = self.data()?;
+
+        Ok(data
+            .options
+            .as_ref()
+            .ok_or_else(|| Error::InvalidPayload("no options".to_string()))?)
     }
 }
 

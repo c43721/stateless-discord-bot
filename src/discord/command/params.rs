@@ -4,7 +4,7 @@ use crate::discord::interaction::{
 };
 
 pub(crate) fn params(meta: &Interaction) -> InteractionResponse {
-    let options = meta.data.as_ref().unwrap().options.as_ref().unwrap();
+    let options = meta.options().unwrap();
 
     InteractionResponse {
         ty: InteractionResponseType::ChannelMessageWithSource,
